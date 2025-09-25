@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stopwatch</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(var(--vh, 1vh) * 100);
+      padding: 20px;
+      overflow: hidden;
+    }
+    #timer {
+      font-size: 10vw;
+      direction: ltr;
+      text-align: center;
+      letter-spacing: 1px;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 700px;
+      white-space: nowrap;
+      font-family: 'Courier New', monospace;
+    }
+    .buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 20px;
+      font-size: 1.2rem;
+      background-color: #111;
+      color: #0f0;
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background-color: #222; }
+    #resetBtn { display: none; }
+  </style>
+</head>
+<body>
+
+  <div id="timer">00:00:00.000</div>
+
+  <div class="buttons">
+    <button id="toggleBtn" onclick="toggleTimer()">شروع</button>
+    <button id="resetBtn" onclick="reset()">ریست</button>
+  </div>
+
+  <script>
+    function setVh() {
+      document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+    }
+    setVh();
+    window.addEventListener('resize', setVh);
+
+    let startTime = 0, interval = null, running = false, elapsed = 0;
+    const timerEl = document.getElementById('timer');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function formatTime(ms) {
+      const millis = Math.floor(ms % 1000);
+      const secs = Math.floor(ms / 1000) % 60;
+      const mins = Math.floor(ms / 60000) % 60;
+      const hrs = Math.floor(ms / 3600000);
+      return (
+        String(hrs).padStart(2, '0') + ':' +
+        String(mins).padStart(2, '0') + ':' +
+        String(secs).padStart(2, '0') + '.' +
+        String(millis).padStart(3, '0')
+      );
+    }
+
+    function update() {
+      const now = performance.now();
+      timerEl.textContent = formatTime(now - startTime);
+    }
+
+    function toggleTimer() {
+      if (!running) {
+        running = true;
+        startTime = performance.now() - elapsed;
+        interval = setInterval(update, 1);
+        toggleBtn.textContent = 'توقف';
+        resetBtn.style.display = "block";
+      } else {
+        running = false;
+        clearInterval(interval);
+        elapsed = performance.now() - startTime;
+        toggleBtn.textContent = 'شروع';
+      }
+    }
+
+    function reset() {
+      running = false;
+      clearInterval(interval);
+      startTime = 0;
+      elapsed = 0;
+      timerEl.textContent = "00:00:00.000";
+      toggleBtn.textContent = 'شروع';
+      resetBtn.style.display = "none";
+    }
+  </script>
+
+</body>
+</html>

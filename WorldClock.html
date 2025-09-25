@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>World Hour</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #eee;
+    }
+    #searchInput {
+      width: 320px;
+      padding: 8px 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 20px;
+      outline: none;
+      background: #222;
+      color: #eee;
+      direction: rtl;
+    }
+    .clock-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .clock {
+      background: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+      width: 220px;
+      padding: 15px 10px;
+      box-sizing: border-box;
+      user-select: none;
+      color: #eee;
+      transition: all 0.3s ease;
+    }
+    .country {
+      font-size: 16px;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      direction: ltr;
+      font-weight: 600;
+      color: #bb86fc;
+    }
+    .time {
+      font-family: monospace;
+      font-size: 17px;
+      font-weight: bold;
+      color: #03dac6;
+      direction: ltr;
+    }
+    @media (max-width: 480px) {
+      .clock {
+        width: 90vw;
+        margin-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>ساعت جهانی</h1>
+  <input type="text" id="searchInput" placeholder="جستجوی کشور..." />
+
+  <div class="clock-container" id="clockContainer"></div>
+
+  <script>
+    const countries = [
+      { flag: '🇮🇷', name: 'ایران', zones: ['Asia/Tehran'] },
+      { flag: '🇺🇸', name: 'آمریکا (نیویورک)', zones: ['America/New_York'] },
+      { flag: '🇺🇸', name: 'آمریکا (شیکاگو)', zones: ['America/Chicago'] },
+      { flag: '🇺🇸', name: 'آمریکا (دنور)', zones: ['America/Denver'] },
+      { flag: '🇺🇸', name: 'آمریکا (لس آنجلس)', zones: ['America/Los_Angeles'] },
+      { flag: '🇨🇦', name: 'کانادا (تورنتو)', zones: ['America/Toronto'] },
+      { flag: '🇨🇦', name: 'کانادا (ونکوور)', zones: ['America/Vancouver'] },
+      { flag: '🇬🇧', name: 'بریتانیا', zones: ['Europe/London'] },
+      { flag: '🇫🇷', name: 'فرانسه', zones: ['Europe/Paris'] },
+      { flag: '🇩🇪', name: 'آلمان', zones: ['Europe/Berlin'] },
+      { flag: '🇮🇹', name: 'ایتالیا', zones: ['Europe/Rome'] },
+      { flag: '🇪🇸', name: 'اسپانیا', zones: ['Europe/Madrid'] },
+      { flag: '🇳🇱', name: 'هلند', zones: ['Europe/Amsterdam'] },
+      { flag: '🇧🇪', name: 'بلژیک', zones: ['Europe/Brussels'] },
+      { flag: '🇷🇺', name: 'روسیه (مسکو)', zones: ['Europe/Moscow'] },
+      { flag: '🇷🇺', name: 'روسیه (یکاترینبورگ)', zones: ['Asia/Yekaterinburg'] },
+      { flag: '🇷🇺', name: 'روسیه (ایلانسک)', zones: ['Asia/Krasnoyarsk'] },
+      { flag: '🇯🇵', name: 'ژاپن', zones: ['Asia/Tokyo'] },
+      { flag: '🇨🇳', name: 'چین', zones: ['Asia/Shanghai'] },
+      { flag: '🇰🇷', name: 'کره جنوبی', zones: ['Asia/Seoul'] },
+      { flag: '🇦🇺', name: 'استرالیا (سیدنی)', zones: ['Australia/Sydney'] },
+      { flag: '🇦🇺', name: 'استرالیا (پرت)', zones: ['Australia/Perth'] },
+      { flag: '🇮🇳', name: 'هند', zones: ['Asia/Kolkata'] },
+      { flag: '🇧🇷', name: 'برزیل (سائوپائولو)', zones: ['America/Sao_Paulo'] },
+      { flag: '🇲🇽', name: 'مکزیک (مکزیکوسیتی)', zones: ['America/Mexico_City'] },
+      { flag: '🇸🇦', name: 'عربستان سعودی', zones: ['Asia/Riyadh'] },
+      { flag: '🇹🇷', name: 'ترکیه', zones: ['Europe/Istanbul'] },
+      { flag: '🇿🇦', name: 'آفریقای جنوبی (ژوهانسبورگ)', zones: ['Africa/Johannesburg'] },
+      { flag: '🇸🇬', name: 'سنگاپور', zones: ['Asia/Singapore'] },
+      { flag: '🇦🇪', name: 'امارات متحده عربی', zones: ['Asia/Dubai'] },
+      { flag: '🇮🇶', name: 'عراق', zones: ['Asia/Baghdad'] },
+      { flag: '🇵🇰', name: 'پاکستان', zones: ['Asia/Karachi'] },
+      { flag: '🇪🇬', name: 'مصر', zones: ['Africa/Cairo'] },
+      { flag: '🇳🇬', name: 'نیجریه', zones: ['Africa/Lagos'] },
+      { flag: '🇦🇷', name: 'آرژانتین (بوئنوس آیرس)', zones: ['America/Argentina/Buenos_Aires'] },
+      { flag: '🇨🇱', name: 'شیلی (سانتیاگو)', zones: ['America/Santiago'] },
+      { flag: '🇸🇪', name: 'سوئد', zones: ['Europe/Stockholm'] },
+      { flag: '🇳🇴', name: 'نروژ', zones: ['Europe/Oslo'] },
+      { flag: '🇵🇱', name: 'لهستان', zones: ['Europe/Warsaw'] },
+      { flag: '🇫🇮', name: 'فنلاند', zones: ['Europe/Helsinki'] },
+      { flag: '🇩🇰', name: 'دانمارک', zones: ['Europe/Copenhagen'] },
+      { flag: '🇨🇿', name: 'جمهوری چک', zones: ['Europe/Prague'] },
+      { flag: '🇭🇺', name: 'مجارستان', zones: ['Europe/Budapest'] },
+      { flag: '🇷🇴', name: 'رومانی', zones: ['Europe/Bucharest'] },
+      { flag: '🇬🇷', name: 'یونان', zones: ['Europe/Athens'] },
+      { flag: '🇮🇸', name: 'ایسلند', zones: ['Atlantic/Reykjavik'] },
+      { flag: '🇺🇦', name: 'اوکراین (کی‌یف)', zones: ['Europe/Kiev'] },
+      { flag: '🇧🇾', name: 'بلاروس', zones: ['Europe/Minsk'] },
+      { flag: '🇱🇹', name: 'لتونی', zones: ['Europe/Riga'] },
+      { flag: '🇱🇻', name: 'لتونی', zones: ['Europe/Vilnius'] },
+      { flag: '🇲🇩', name: 'مولداوی', zones: ['Europe/Chisinau'] },
+      { flag: '🇨🇭', name: 'سوئیس', zones: ['Europe/Zurich'] },
+      { flag: '🇱🇺', name: 'لوکزامبورگ', zones: ['Europe/Luxembourg'] },
+      { flag: '🇳🇿', name: 'نیوزیلند (ولینگتون)', zones: ['Pacific/Auckland'] },
+      { flag: '🇵🇪', name: 'پرو', zones: ['America/Lima'] },
+      { flag: '🇨🇴', name: 'کلمبیا', zones: ['America/Bogota'] },
+      { flag: '🇻🇪', name: 'ونزوئلا', zones: ['America/Caracas'] },
+      { flag: '🇧🇬', name: 'بلغارستان', zones: ['Europe/Sofia'] },
+      { flag: '🇭🇷', name: 'کرواسی', zones: ['Europe/Zagreb'] },
+      { flag: '🇸🇰', name: 'اسلواکی', zones: ['Europe/Bratislava'] },
+      { flag: '🇸🇮', name: 'اسلوونی', zones: ['Europe/Ljubljana'] },
+      { flag: '🇲🇹', name: 'مالت', zones: ['Europe/Malta'] },
+      { flag: '🇮🇪', name: 'ایرلند', zones: ['Europe/Dublin'] },
+      { flag: '🇧🇦', name: 'بوسنی و هرزگوین', zones: ['Europe/Sarajevo'] },
+      { flag: '🇷🇸', name: 'صربستان', zones: ['Europe/Belgrade'] },
+      { flag: '🇲🇪', name: 'مونته‌نگرو', zones: ['Europe/Podgorica'] },
+      { flag: '🇲🇰', name: 'مقدونیه شمالی', zones: ['Europe/Skopje'] },
+      { flag: '🇦🇱', name: 'آلبانی', zones: ['Europe/Tirane'] },
+      { flag: '🇩🇿', name: 'الجزایر', zones: ['Africa/Algiers'] },
+      { flag: '🇲🇦', name: 'مراکش', zones: ['Africa/Casablanca'] },
+      { flag: '🇹🇳', name: 'تونس', zones: ['Africa/Tunis'] },
+      { flag: '🇱🇧', name: 'لبنان', zones: ['Asia/Beirut'] },
+      { flag: '🇯🇴', name: 'اردن', zones: ['Asia/Amman'] },
+      { flag: '🇰🇼', name: 'کویت', zones: ['Asia/Kuwait'] },
+      { flag: '🇧🇭', name: 'بحرین', zones: ['Asia/Bahrain'] },
+      { flag: '🇶🇦', name: 'قطر', zones: ['Asia/Qatar'] },
+      { flag: '🇦🇲', name: 'ارمنستان', zones: ['Asia/Yerevan'] },
+      { flag: '🇬🇪', name: 'گرجستان', zones: ['Asia/Tbilisi'] },
+      { flag: '🇦🇿', name: 'آذربایجان', zones: ['Asia/Baku'] },
+      { flag: '🇧🇩', name: 'بنگلادش', zones: ['Asia/Dhaka'] },
+      { flag: '🇱🇰', name: 'سریلانکا', zones: ['Asia/Colombo'] },
+      { flag: '🇲🇲', name: 'میانمار', zones: ['Asia/Yangon'] },
+      { flag: '🇹🇭', name: 'تایلند', zones: ['Asia/Bangkok'] },
+      { flag: '🇻🇳', name: 'ویتنام', zones: ['Asia/Ho_Chi_Minh'] },
+      { flag: '🇰🇭', name: 'کامبوج', zones: ['Asia/Phnom_Penh'] },
+      { flag: '🇵🇭', name: 'فیلیپین', zones: ['Asia/Manila'] },
+      { flag: '🇮🇩', name: 'اندونزی (جاکارتا)', zones: ['Asia/Jakarta'] },
+      { flag: '🇮🇩', name: 'اندونزی (بالی)', zones: ['Asia/Makassar'] },
+      { flag: '🇲🇾', name: 'مالزی', zones: ['Asia/Kuala_Lumpur'] },
+      { flag: '🇸🇾', name: 'سوریه', zones: ['Asia/Damascus'] },
+      { flag: '🇾🇪', name: 'یمن', zones: ['Asia/Aden'] },
+      { flag: '🇸🇩', name: 'سودان', zones: ['Africa/Khartoum'] },
+      { flag: '🇪🇷', name: 'اریتره', zones: ['Africa/Asmara'] },
+      { flag: '🇨🇻', name: 'کیپ ورد', zones: ['Atlantic/Cape_Verde'] },
+      { flag: '🇮🇸', name: 'ایسلند', zones: ['Atlantic/Reykjavik'] },
+    ];
+
+    const container = document.getElementById('clockContainer');
+    const searchInput = document.getElementById('searchInput');
+
+    function createClockElements() {
+      container.innerHTML = '';
+      countries.forEach(({flag, name}, i) => {
+        const div = document.createElement('div');
+        div.className = 'clock';
+        div.dataset.name = name;
+        div.innerHTML = `<div class="country">${flag} ${name}</div><div class="time" id="time${i}">--:--:--</div>`;
+        container.appendChild(div);
+      });
+    }
+
+    createClockElements();
+
+    function toTwoDigits(n) {
+      return n.toString().padStart(2, '0');
+    }
+    function formatExactTime(date) {
+      return `${toTwoDigits(date.getHours())}:${toTwoDigits(date.getMinutes())}:${toTwoDigits(date.getSeconds())}`;
+    }
+    function getAverageTime(timezones) {
+      const now = new Date();
+      const times = timezones.map(tz => new Date(now.toLocaleString('en-US', { timeZone: tz })));
+      const avgTimestamp = times.reduce((sum, t) => sum + t.getTime(), 0) / times.length;
+      return new Date(avgTimestamp);
+    }
+
+    function updateClocks() {
+      countries.forEach(({zones}, i) => {
+        const time = zones.length === 1 ? 
+          new Date(new Date().toLocaleString('en-US', { timeZone: zones[0] })) : 
+          getAverageTime(zones);
+        const timeElem = document.getElementById(`time${i}`);
+        if (timeElem) timeElem.textContent = formatExactTime(time);
+      });
+    }
+
+    function filterClocks() {
+      const query = searchInput.value.trim();
+      const clocks = container.querySelectorAll('.clock');
+      clocks.forEach(clock => {
+        const name = clock.dataset.name;
+        if (name.includes(query)) {
+          clock.style.display = 'block';
+        } else {
+          clock.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', filterClocks);
+
+    updateClocks();
+    setInterval(updateClocks, 500);
+  </script>
+</body>
+</html>

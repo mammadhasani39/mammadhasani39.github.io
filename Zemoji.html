@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zemoji</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: #121212;
+      color: #f1f1f1;
+    }
+    h1 {
+      margin-top: 30px;
+      font-size: 2em;
+    }
+    input, button, textarea {
+      width: 90%;
+      max-width: 500px;
+      padding: 12px;
+      font-size: 1.1em;
+      margin: 10px auto;
+      display: block;
+      border-radius: 8px;
+      background-color: #1e1e1e;
+      color: #f1f1f1;
+      border: 1px solid #444;
+    }
+    input::placeholder {
+      color: #aaa;
+    }
+    button {
+      font-weight: bold;
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2e7d32;
+    }
+    .copy-btn {
+      font-weight: bold;
+      background-color: #1565c0;
+    }
+    .copy-btn:hover {
+      background-color: #0d47a1;
+    }
+    #message {
+      color: #66bb6a;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    textarea {
+      height: 160px;
+      resize: vertical;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 1em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>زموجی</h1>
+  <input type="text" id="emoji" placeholder="ایموجی را وارد کنید">
+  <button onclick="generate()">بساز</button>
+  <textarea id="output" readonly></textarea>
+  <button class="copy-btn" onclick="copyToClipboard()">کپی</button>
+  <div id="message"></div>
+
+  <script>
+    function generate() {
+      const emoji = document.getElementById("emoji").value.trim();
+      const count = 100;
+      const zwj = '\u200D';
+      let result = "";
+
+      if (!emoji) {
+        document.getElementById("message").textContent = "لطفاً ایموجی وارد کنید.";
+        return;
+      }
+
+      for (let i = 0; i < count; i++) {
+        result += emoji + zwj;
+      }
+
+      result = result.slice(0, -1);
+      document.getElementById("output").value = result;
+      document.getElementById("message").textContent = "";
+    }
+
+    function copyToClipboard() {
+      const output = document.getElementById("output");
+      output.select();
+      output.setSelectionRange(0, 99999);
+
+      try {
+        document.execCommand('copy');
+        document.getElementById("message").textContent = "کپی شد!";
+      } catch (err) {
+        navigator.clipboard.writeText(output.value).then(() => {
+          document.getElementById("message").textContent = "کپی شد!";
+        }).catch(() => {
+          document.getElementById("message").textContent = "کپی نشد!";
+        });
+      }
+    }
+  </script>
+</body>
+</html>

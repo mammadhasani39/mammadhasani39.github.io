@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Snake Game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap');
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      font-family: 'Vazirmatn', sans-serif;
+      font-weight: bold;
+      direction: rtl;
+    }
+
+    #app {
+      background: #000;
+      color: #0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      max-width: 360px;
+      width: 100vw;
+      box-sizing: border-box;
+      padding-top: 40px;
+      margin: 0 auto;
+    }
+
+    #score {
+      font-size: 22px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    canvas {
+      background: #111;
+      border: 6px solid #0f0;
+      touch-action: none;
+      width: 90vmin;
+      height: 90vmin;
+      max-width: 360px;
+      max-height: 360px;
+      display: block;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 12px;
+      background: #000;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .btn {
+      width: 80px;
+      height: 80px;
+      background: #222;
+      color: #0f0;
+      font-size: 32px;
+      border: 1px solid #0f0;
+      border-radius: 10px;
+      text-align: center;
+      line-height: 80px;
+      user-select: none;
+      transition: transform 0.1s;
+      font-weight: bold;
+    }
+
+    .btn:active {
+      transform: scale(0.9);
+    }
+
+    #restartBtn {
+      display: none;
+      margin-top: 15px;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    #difficultySelect {
+      margin: 10px 0;
+      color: #0f0;
+      font-weight: bold;
+    }
+
+    select {
+      background: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
+      font-family: 'Vazirmatn', monospace;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: #000;
+      border: 2px solid #0f0;
+      color: #0f0;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .modal-content button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <table height="100%" width="100%" cellspacing="0" cellpadding="0" style="background: #000;">
+    <tbody>
+      <tr>
+        <td align="center" valign="middle" style="background: #000;">
+          <div id="app">
+            <div id="score">امتیاز: ۰</div>
+
+            <div id="difficultySelect">
+              <label for="difficulty">درجه سختی:</label>
+              <select id="difficulty">
+                <option value="100000000000000000000">ممکن</option>
+                <option value="250">خیلی آسان</option>
+                <option value="190">آسان</option>
+                <option value="140" selected>متوسط</option>
+                <option value="60">سخت</option>
+                <option value="20">خیلی سخت</option>
+                <option value="1">غیرممکن</option>
+              </select>
+            </div>
+
+            <canvas id="game" width="300" height="300"></canvas>
+
+            <div class="controls">
+              <div></div>
+              <div class="btn" ontouchstart="setDir('up')">↑</div>
+              <div></div>
+              <div class="btn" ontouchstart="setDir('right')">→</div> <!-- دکمه راست -->
+              <div class="btn" ontouchstart="setDir('down')">↓</div>
+              <div class="btn" ontouchstart="setDir('left')">←</div> <!-- دکمه چپ -->
+            </div>
+
+            <button id="restartBtn" onclick="resetGame()">شروع دوباره</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div id="gameOverModal" class="modal">
+    <div class="modal-content">
+      <div id="finalScore" style="margin-top: 10px;">امتیاز: ۰</div>
+      <button onclick="resetGame()">شروع دوباره</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+    const restartBtn = document.getElementById('restartBtn');
+    const difficultySelect = document.getElementById('difficulty');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const finalScore = document.getElementById('finalScore');
+    const gridSize = 15;
+    const tileCount = canvas.width / gridSize;
+    let snake, food, dx, dy, started, score, speed = 150;
+    let canChangeDir = true;
+
+    function initGame() {
+      speed = parseInt(difficultySelect.value);
+      snake = [{ x: Math.floor(tileCount / 2), y: Math.floor(tileCount / 2) }];
+      dx = 0;
+      dy = 0;
+      started = false;
+      score = 0;
+      canChangeDir = true;
+      scoreDisplay.textContent = `امتیاز: 0`;
+      difficultySelect.disabled = false;
+      restartBtn.style.display = 'none';
+      gameOverModal.style.display = 'none';
+      placeFood();
+      draw();
+    }
+
+    function gameLoop() {
+      if (!started) return setTimeout(gameLoop, speed);
+
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+      if (
+        head.x < 0 || head.x >= tileCount ||
+        head.y < 0 || head.y >= tileCount ||
+        snake.some(seg => seg.x === head.x && seg.y === head.y)
+      ) {
+        const difficultyLabel = difficultySelect.options[difficultySelect.selectedIndex].text;
+        finalScore.innerHTML = `
+          <div>پایان بازی!</div>
+          <div>درجه سختی: ${difficultyLabel}</div>
+          <div>امتیاز: ${score}</div>
+        `;
+        gameOverModal.style.display = 'flex';
+        return;
+      }
+
+      snake.unshift(head);
+
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        scoreDisplay.textContent = `امتیاز: ${score}`;
+        placeFood();
+      } else {
+        snake.pop();
+      }
+
+      canChangeDir = true;
+      draw();
+      setTimeout(gameLoop, speed);
+    }
+
+    function draw() {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0f0';
+      snake.forEach(seg => {
+        ctx.fillRect(seg.x * gridSize, seg.y * gridSize, gridSize - 2, gridSize - 2);
+      });
+
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+    }
+
+    function placeFood() {
+      let newFood;
+      do {
+        newFood = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+      } while (snake.some(seg => seg.x === newFood.x && seg.y === newFood.y));
+      food = newFood;
+    }
+
+    function setDir(dir) {
+      if (!canChangeDir) return;
+
+      if (dir === 'up' && dy === 0) { dx = 0; dy = -1; }
+      else if (dir === 'down' && dy === 0) { dx = 0; dy = 1; }
+      else if (dir === 'left' && dx === 0) { dx = -1; dy = 0; }
+      else if (dir === 'right' && dx === 0) { dx = 1; dy = 0; }
+      else return;
+
+      if (navigator.vibrate) navigator.vibrate(50);
+
+      canChangeDir = false;
+
+      if (!started && (dx !== 0 || dy !== 0)) {
+        started = true;
+        difficultySelect.disabled = true;
+        gameLoop();
+      }
+    }
+
+    function resetGame() {
+      initGame();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp') setDir('up');
+      else if (e.key === 'ArrowDown') setDir('down');
+      else if (e.key === 'ArrowLeft') setDir('left');
+      else if (e.key === 'ArrowRight') setDir('right');
+    });
+
+    difficultySelect.addEventListener('change', () => {
+      if (!started) {
+        speed = parseInt(difficultySelect.value);
+      }
+    });
+
+    initGame();
+  </script>
+</body>
+</html>

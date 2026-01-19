@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChatGPT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Vazirmatn', sans-serif;
+      background: #121212;
+      color: #ddd;
+      padding: 20px;
+    }
+
+    .container {
+      background: #222;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 80vh;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #ddd;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .chat-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .bubble {
+      max-width: 80%;
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      border-radius: 20px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      box-shadow: 0 1px 5px rgba(255,255,255,0.1);
+      position: relative;
+      color: #eee;
+    }
+
+    .user-bubble {
+      background-color: #355a9f;
+      align-self: flex-end;
+      border-bottom-left-radius: 0;
+      text-align: right;
+    }
+
+    .bot-bubble {
+      background-color: #2b3e55;
+      align-self: flex-start;
+      border-bottom-right-radius: 0;
+      border-right: 5px solid #90caf9;
+    }
+
+    .timestamp {
+      font-size: 11px;
+      color: #bbb;
+      margin-top: 4px;
+      text-align: left;
+      user-select: none;
+    }
+
+    .blinking {
+      animation: blinkFade 1s infinite;
+    }
+
+    @keyframes blinkFade {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+
+    .bot-bubble h3 {
+      font-size: 18px;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      color: #ffd54f;
+    }
+
+    .bot-bubble q {
+      quotes: "«" "»";
+      color: #81d4fa;
+      font-style: italic;
+    }
+
+    .rtl {
+      direction: rtl;
+      text-align: right;
+    }
+
+    .input-area {
+      border-top: 1px solid #555;
+      padding: 16px;
+      background: #343541;
+      margin: 0 -20px -20px -20px;
+      border-radius: 0 0 15px 15px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #40414f;
+      border-radius: 8px;
+      padding: 8px 12px;
+      gap: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      background: transparent;
+      color: #fff;
+      border: none;
+      resize: none;
+      font-size: 16px;
+      height: 24px;
+      max-height: 150px;
+      overflow-y: auto;
+      outline: none;
+      font-family: 'Vazirmatn', sans-serif;
+      direction: rtl;
+      text-align: right;
+    }
+
+    .send-button {
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: 'Vazirmatn', sans-serif;
+      transition: 0.3s;
+    }
+
+.send-button:hover {
+  background: #1565c0;
+}
+
+    .send-button img {
+      width: 24px;
+      height: 24px;
+      filter: invert(1);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>چت جی پی تی</h1>
+  <div class="chat-area" id="chat-area"></div>
+
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea id="question" placeholder="سوالتو بپرس..."></textarea>
+      <button onclick="askGPT()" class="send-button" aria-label="ارسال">
+      ارسال
+    </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const chatArea = document.getElementById("chat-area");
+  const questionInput = document.getElementById("question");
+
+  let fullConversation = [];
+
+  function createBubble(className) {
+    const bubble = document.createElement("div");
+    bubble.className = `bubble ${className}`;
+
+    const msgText = document.createElement("div");
+    bubble.appendChild(msgText);
+
+    const timeSpan = document.createElement("div");
+    const now = new Date();
+    timeSpan.className = "timestamp";
+    timeSpan.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    bubble.appendChild(timeSpan);
+
+    return { bubble, msgText };
+  }
+
+  function markdownToHTML(text) {
+    return text
+      .replace(/### (.*)/g, '<h3>$1</h3>')
+      .replace(/"([^"]+)"/g, '<q>$1</q>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function typeText(target, htmlText, speed = 1) {
+    let formatted = markdownToHTML(htmlText);
+    let index = 0;
+    target.innerHTML = "";
+
+    function typeChar() {
+      if (index <= formatted.length) {
+        target.innerHTML = formatted.slice(0, index++);
+        chatArea.scrollTop = 0;
+        setTimeout(typeChar, speed);
+      }
+    }
+
+    return new Promise(resolve => {
+      typeChar();
+      setTimeout(resolve, formatted.length * speed + 100);
+    });
+  }
+
+  async function askGPT() {
+    const question = questionInput.value.trim();
+    if (!question) {
+      alert("⚠️ لطفاً یک سوال وارد کنید");
+      return;
+    }
+
+    const { bubble: userBubble, msgText: userText } = createBubble("user-bubble");
+    userText.textContent = question;
+    chatArea.prepend(userBubble);
+    questionInput.value = "";
+
+    const { bubble: botBubble, msgText: botText } = createBubble("bot-bubble");
+    botText.innerHTML = "در حال نوشتن...";
+    botText.classList.add("blinking");
+    chatArea.prepend(botBubble);
+
+    fullConversation.push(question);
+
+    const prompt = fullConversation.join("\n");
+    const encoded = encodeURIComponent(prompt);
+    const url = "https://api.api-code.ir/gpt-4o/?text=" + encoded;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Referer": "https://api.api-code.ir/",
+        "Origin": "https://api.api-code.ir"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      botText.classList.remove("blinking");
+      botText.innerHTML = "";
+      const response = data.result || "⚠️ پاسخی دریافت نشد.";
+      fullConversation.push("بات: " + response);
+
+      const firstWord = response.trim().split(/\s+/)[0];
+      if (/[\u0600-\u06FF]/.test(firstWord)) {
+        botText.classList.add("rtl");
+      } else {
+        botText.classList.remove("rtl");
+      }
+
+      typeText(botText, response);
+    })
+    .catch(err => {
+      botText.classList.remove("blinking");
+      botText.innerHTML = "⚠️ خطا:\n" + err;
+    });
+  }
+
+  questionInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      askGPT();
+    }
+  });
+</script>
+
+</body>
+</html>

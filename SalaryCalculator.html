@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salary Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Vazir", sans-serif;
+      background: #121212;
+      color: #f1f1f1;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      direction: rtl;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 1.6em;
+    }
+
+    .box {
+      background: #1e1e1e;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+      max-width: 400px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+      margin: 8px 0;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #2a2a2a;
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    button.add-btn {
+      background-color: #1976d2;
+      color: white;
+    }
+    button.add-btn:hover {
+      background-color: #0d47a1;
+    }
+
+    button.calc-btn {
+      background-color: #f57c00;
+      color: white;
+    }
+    button.calc-btn:hover {
+      background-color: #e65100;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background: #2a2a2a;
+    }
+
+    .action-btn {
+      font-size: 0.8em;
+      padding: 2px 6px;
+      margin: 0 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background: #1976d2;
+      color: #fff;
+    }
+    .edit-btn:hover {
+      background: #0d47a1;
+    }
+
+    .delete-btn {
+      background: #d32f2f;
+      color: #fff;
+    }
+    .delete-btn:hover {
+      background: #9a0007;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1em;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h1>محاسبه حقوق ساعتی</h1>
+    <p>
+      ساعت را به صورت 4 رقمی<br>
+      و بدون «:» وارد کنید<br>
+      مثال: 1730
+    </p>
+
+    <input type="text" id="timeInput" 
+       placeholder="بنویس..." 
+       inputmode="numeric" 
+       pattern="[0-9]*" 
+       maxlength="4">
+    <button class="add-btn" onclick="addTime()">ثبت</button>
+    <button class="calc-btn" onclick="calculate()">محاسبه</button>
+
+    <div id="log"></div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    let times = [];
+    const logDiv = document.getElementById('log');
+    const resultDiv = document.getElementById('result');
+    let expecting = 'ورود';
+
+    function parseTime(str) {
+      if (str.length !== 4 || isNaN(str)) return null;
+      let h = parseInt(str.slice(0, 2));
+      let m = parseInt(str.slice(2));
+      if (h > 23 || m > 59) return null;
+      return { str, h, m };
+    }
+
+    function addTime() {
+      const input = document.getElementById('timeInput');
+      const val = input.value.trim();
+      const parsed = parseTime(val);
+
+      if (!parsed) {
+        alert('⛔ فرمت ساعت اشتباه است!');
+        return;
+      }
+
+      times.push({ ...parsed, type: expecting });
+      expecting = (expecting === 'ورود') ? 'خروج' : 'ورود';
+      input.value = '';
+      input.focus();
+      renderLog();
+    }
+
+    function renderLog() {
+      if (times.length === 0) {
+        logDiv.innerHTML = "";
+        return;
+      }
+
+      let html = `
+        <table>
+          <tr>
+            <th>نوع</th>
+            <th>ساعت</th>
+            <th>عملیات</th>
+          </tr>
+      `;
+
+      times.forEach((t, i) => {
+        html += `
+          <tr>
+            <td>${t.type}</td>
+            <td>${t.str}</td>
+            <td>
+              <button class="action-btn edit-btn" onclick="editTime(${i})">✏️</button>
+              <button class="action-btn delete-btn" onclick="deleteTime(${i})">❌</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</table>`;
+      logDiv.innerHTML = html;
+    }
+
+    function editTime(index) {
+      const newVal = prompt("⏰ زمان جدید را وارد کنید (مثال: 1730):", times[index].str);
+      const parsed = parseTime(newVal);
+      if (parsed) {
+        times[index] = { ...parsed, type: times[index].type };
+        renderLog();
+      } else {
+        alert("⛔ فرمت ساعت اشتباه است!");
+      }
+    }
+
+    function deleteTime(index) {
+      if (confirm("❓ آیا مطمئن هستید که می‌خواهید این زمان حذف شود؟")) {
+        times.splice(index, 1);
+        renderLog();
+      }
+    }
+
+    function pad(num) {
+      return num.toString().padStart(2, '0');
+    }
+
+    function calculate() {
+      if (times.length % 2 !== 0) {
+        alert('⛔ تعداد زمان ها ناقص است! هر ورود باید یک خروج داشته باشد.');
+        return;
+      }
+
+      let totalMinutes = 0;
+      for (let i = 0; i < times.length; i += 2) {
+        const start = new Date(0, 0, 0, times[i].h, times[i].m);
+        const end = new Date(0, 0, 0, times[i+1].h, times[i+1].m);
+        if (end <= start) {
+          alert('⛔ خروج باید بعد از ورود باشد!');
+          return;
+        }
+        totalMinutes += (end - start) / (1000 * 60);
+      }
+
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = Math.round(totalMinutes % 60);
+      const formattedTime = `${pad(hours)}:${pad(minutes)}`;
+
+      const wage = prompt("💵 حقوق ساعتی چقدر است؟ (تومان)");
+      let salary = 0;
+
+      if (wage && !isNaN(wage)) {
+        const hourlyWage = parseFloat(wage);
+        salary = Math.floor((totalMinutes / 60) * hourlyWage);
+      }
+
+      resultDiv.innerHTML = `
+        <hr>
+        ⏳ مجموع ساعات کاری: ${formattedTime} <br>
+        💰 حقوق کل: ${salary.toLocaleString('en-US')} تومان
+      `;
+    }
+  </script>
+
+</body>
+</html>

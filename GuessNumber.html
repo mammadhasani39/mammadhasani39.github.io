@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guess Number</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      background: #222;
+      color: #eee;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100dvh;
+      user-select: none;
+      position: relative;
+      padding-top: 8vh;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+    input[type=number] {
+      width: 70vw;
+      max-width: 300px;
+      padding: 12px;
+      font-size: 1.5rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-bottom: 15px;
+      text-align: center;
+      background: #333;
+      color: #eee;
+      -webkit-appearance: none;
+      -moz-appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    button {
+      width: 70vw;
+      max-width: 300px;
+      padding: 14px;
+      font-size: 1.6rem;
+      border: none;
+      border-radius: 8px;
+      background: #0af;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+      touch-action: manipulation;
+      margin-top: 10px;
+    }
+    button:active {
+      background: #06c;
+    }
+    #restartBtn {
+      background: #4caf50;
+      display: none;
+    }
+    #message {
+      margin-top: 18px;
+      font-size: 1.4rem;
+      min-height: 36px;
+      text-align: center;
+      font-weight: 600;
+    }
+    #attempts {
+      margin-top: 6px;
+      font-size: 1.2rem;
+      text-align: center;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>بازی حدس عدد</h1>
+  <input id="guessInput" type="number" min="1" max="100" placeholder="از 1 تا 100 حدس بزن" autocomplete="off" />
+  <button onclick="makeGuess()">حدس زدن</button>
+  <button id="restartBtn" onclick="restartGame()">شروع دوباره</button>
+  <div id="message"></div>
+  <div id="attempts"></div>
+
+  <script>
+    let secretNumber = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+    const messageEl = document.getElementById('message');
+    const attemptsEl = document.getElementById('attempts');
+    const inputEl = document.getElementById('guessInput');
+    const buttonEl = document.querySelector('button');
+    const restartBtn = document.getElementById('restartBtn');
+
+    function makeGuess() {
+      const guess = Number(inputEl.value);
+      if (!guess || guess < 1 || guess > 100) {
+        messageEl.textContent = "عدد باید بین 1 تا 100 باشه";
+        messageEl.style.color = "#f55";
+        return;
+      }
+      attempts++;
+      if (guess === secretNumber) {
+        messageEl.textContent = `با ${attempts} حدس برنده شدی`;
+        messageEl.style.color = "#4caf50";
+        attemptsEl.textContent = "";
+        inputEl.disabled = true;
+        buttonEl.disabled = true;
+        restartBtn.style.display = "block";
+      } else if (guess < secretNumber) {
+        messageEl.textContent = "عدد بیشتر است";
+        messageEl.style.color = "#eee";
+        attemptsEl.textContent = `تعداد تلاش ها: ${attempts}`;
+      } else {
+        messageEl.textContent = "عدد کمتر است";
+        messageEl.style.color = "#eee";
+        attemptsEl.textContent = `تعداد تلاش ها: ${attempts}`;
+      }
+      inputEl.value = "";
+      inputEl.focus();
+    }
+
+    function restartGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      messageEl.textContent = "";
+      attemptsEl.textContent = "";
+      inputEl.disabled = false;
+      buttonEl.disabled = false;
+      inputEl.value = "";
+      inputEl.focus();
+      restartBtn.style.display = "none";
+    }
+
+    inputEl.addEventListener('focus', () => {
+      setTimeout(() => window.scrollTo(0, 0), 100);
+    });
+  </script>
+</body>
+</html>

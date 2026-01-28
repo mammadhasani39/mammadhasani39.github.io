@@ -25,7 +25,7 @@
   </style>
 </head>
 <body>
-  <div id="clock">00:00:00.0</div>
+  <div id="clock">00:00:00.000</div>
 
   <script>
     function updateClock() {
@@ -33,13 +33,13 @@
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
-      const deciseconds = Math.floor(now.getMilliseconds() / 100); // فقط یک رقم
+      const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
 
       document.getElementById("clock").textContent =
-        `${hours}:${minutes}:${seconds}.${deciseconds}`;
+        `${hours}:${minutes}:${seconds}.${milliseconds}`;
     }
 
-    setInterval(updateClock, 100);
+    setInterval(updateClock, 1);
     updateClock();
   </script>
 </body>

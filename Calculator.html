@@ -12,7 +12,6 @@
       justify-content: center;
       align-items: flex-end;
       height: 100dvh;
-      background: #121212;
       font-family: Arial, sans-serif;
       margin: 0;
       -webkit-user-select: none;
@@ -20,16 +19,18 @@
       touch-action: manipulation;
       position: relative;
       overflow: hidden;
+      background: #121212;
     }
 
     body::before {
       content: "";
       position: absolute;
-      top: -180px;
-      width: 100%;
-      height: 350px;
-      background: radial-gradient(circle, rgba(76,175,80,0.18), transparent 70%);
-      filter: blur(70px);
+      inset: -20%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(76,175,80,0.35), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(0,150,255,0.25), transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(255,0,150,0.20), transparent 50%);
+      filter: blur(80px);
       z-index: 0;
     }
 
@@ -44,7 +45,7 @@
     .history {
       max-height: 30vh;
       overflow-y: auto;
-      color: #9e9e9e;
+      color: #bdbdbd;
       font-size: 14px;
       line-height: 1.8;
       direction: ltr;
@@ -146,19 +147,12 @@
   </div>
 
   <script>
+    const result = document.getElementById("result");
     const historyDiv = document.getElementById("history");
 
-    function appendValue(val) {
-      result.value += val;
-    }
-
-    function clearResult() {
-      result.value = "";
-    }
-
-    function deleteChar() {
-      result.value = result.value.slice(0, -1);
-    }
+    function appendValue(val) { result.value += val; }
+    function clearResult() { result.value = ""; }
+    function deleteChar() { result.value = result.value.slice(0, -1); }
 
     function addToHistory(expression, answer) {
       const item = document.createElement("div");

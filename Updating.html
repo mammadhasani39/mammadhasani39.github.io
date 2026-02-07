@@ -1,0 +1,140 @@
+<!DOCTYPE html>  
+<html lang="fa" dir="rtl">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Updating...</title>  
+  <style>  
+    body {  
+      margin: 0;  
+      padding: 0;  
+      background: black;  
+      color: white;  
+      font-family: 'Vazirmatn', monospace;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      justify-content: center;  
+      height: 100dvh;  
+      text-align: center;  
+      overflow: hidden;  
+      position: relative;  
+    }  
+  
+    .matrix {  
+      position: absolute;  
+      top: 0;  
+      left: 0;  
+      width: 100%;  
+      height: 100%;  
+      z-index: 0;  
+      background: radial-gradient(circle at center, #0d0d0d, #000000);  
+      overflow: hidden;  
+    }  
+  
+    canvas {  
+      position: absolute;  
+      top: 0;  
+      left: 0;  
+      width: 100%;  
+      height: 100%;  
+      z-index: 0;  
+    }  
+  
+    .gear {  
+      width: 100px;  
+      height: 100px;  
+      margin-bottom: 10px;  
+      margin-top: -20px;  
+      animation: spin 3s linear infinite;  
+      z-index: 2;  
+    }  
+  
+    @keyframes spin {  
+      0% { transform: rotate(0deg); }  
+      100% { transform: rotate(360deg); }  
+    }  
+  
+    p {
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.6;
+      margin-top: 0;
+      z-index: 2;
+      background: linear-gradient(90deg, #00bfff, #ff004c, #00bfff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 10px #00bfff,
+        0 0 20px #ff004c,
+        0 0 30px #00bfff;
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      0% {
+        text-shadow:
+          0 0 10px #00bfff,
+          0 0 20px #ff004c;
+      }
+      100% {
+        text-shadow:
+          0 0 20px #ff004c,
+          0 0 40px #00bfff;
+      }
+    }
+  </style>  
+</head>  
+<body>  
+  <div class="matrix">  
+    <canvas id="matrix"></canvas>  
+  </div>  
+  
+  <svg class="gear" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white">  
+    <path d="M94.4 56.1c.4-2.1.6-4.3.6-6.5s-.2-4.4-.6-6.5l-9.9-2.2c-.7-2.5-1.7-4.9-3-7.2l6.1-8.3c-1.5-2.2-3.1-4.3-4.9-6.2-1.8-1.8-3.9-3.5-6.2-4.9l-8.3 6.1c-2.3-1.3-4.7-2.3-7.2-3l-2.2-9.9c-2.1-.4-4.3-.6-6.5-.6s-4.4.2-6.5.6l-2.2 9.9c-2.5.7-4.9 1.7-7.2 3l-8.3-6.1c-2.2 1.5-4.3 3.1-6.2 4.9-1.8 1.8-3.5 3.9-4.9 6.2l6.1 8.3c-1.3 2.3-2.3 4.7-3 7.2l-9.9 2.2c-.4 2.1-.6 4.3-.6 6.5s.2 4.4.6 6.5l9.9 2.2c.7 2.5 1.7 4.9 3 7.2l-6.1 8.3c1.5 2.2 3.1 4.3 4.9 6.2 1.8 1.8 3.9 3.5 6.2 4.9l8.3-6.1c2.3 1.3 4.7 2.3 7.2 3l2.2 9.9c2.1.4 4.3.6 6.5.6s4.4-.2 6.5-.6l2.2-9.9c2.5-.7 4.9-1.7 7.2-3l8.3 6.1c2.2-1.5 4.3-3.1 6.2-4.9 1.8-1.8 3.5-3.9 4.9-6.2l-6.1-8.3c1.3-2.3 2.3-4.7 3-7.2l9.9-2.2zM50 65c-8.3 0-15-6.7-15-15s6.7-15 15-15 15 6.7 15 15-6.7 15-15 15z"/>  
+  </svg>  
+  
+  <p>سایت در حال بروزرسانی میباشد<br>از شکیبایی شما متشکریم</p>  
+  
+  <script>  
+    const canvas = document.getElementById("matrix");  
+    const ctx = canvas.getContext("2d");  
+  
+    let fontSize = 14;  
+    let letters = "01";  
+    let columns;  
+    let drops;  
+  
+    function setupCanvas() {  
+      canvas.width = window.innerWidth;  
+      canvas.height = window.innerHeight;  
+      columns = Math.ceil(canvas.width / fontSize);  
+      drops = Array(columns).fill().map(() => Math.floor(Math.random() * (canvas.height / fontSize)));  
+    }  
+  
+    function draw() {  
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";  
+      ctx.fillRect(0, 0, canvas.width, canvas.height);  
+  
+      ctx.fillStyle = "#0f0";  
+      ctx.font = fontSize + "px monospace";  
+  
+      for (let i = 0; i < drops.length; i++) {  
+        const text = letters[Math.floor(Math.random() * letters.length)];  
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);  
+  
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {  
+          drops[i] = 0;  
+        }  
+  
+        drops[i]++;  
+      }  
+    }  
+  
+    setupCanvas();  
+    setInterval(draw, 35);  
+  
+    window.addEventListener("resize", setupCanvas);  
+  </script>  
+</body>  
+</html>

@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Redirect</title>
-  <meta http-equiv="refresh" content="2; url=https://google.com">
+  <title>صبر کن...</title>
+  <script>
+    setTimeout(() => {
+      window.location.href = "https://google.com";
+    }, 2000);
+
+    setTimeout(() => {
+      window.location.href = window.location.href;
+    }, 4000);
+  </script>
 </head>
 <body>
 </body>

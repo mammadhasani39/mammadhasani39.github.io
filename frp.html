@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launcher</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0f0f0f;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 25px;
+    }
+    .btn {
+      display: block;
+      width: 92%;
+      max-width: 420px;
+      margin: 8px auto;
+      padding: 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: white;
+      font-size: 15px;
+      background: linear-gradient(45deg, #4facfe, #00f2fe);
+    }
+    .btn:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+
+<h1>Launcher</h1>
+
+<a class="btn" href="intent://com.android.settings/#Intent;scheme=android-app;end">Settings</a>
+<a class="btn" href="intent://com.miui.securitycenter/#Intent;scheme=android-app;end">Xiaomi Security</a>
+<a class="btn" href="intent://com.google.android.gms/#Intent;scheme=promote_smartlock_scheme;end">Set lock screen</a>
+<a class="btn" href="intent://com.xiaomi.mipicks/#Intent;scheme=android-app;end">GetApps</a>
+<a class="btn" href="intent://com.xiaomi.midrop/#Intent;scheme=android-app;end">ShareMe</a>
+<a class="btn" href="intent://com.mi.android.globalFileexplorer/#Intent;scheme=android-app;end">Xiaomi Files</a>
+<a class="btn" href="intent://com.google.android.googlequicksearchbox/#Intent;scheme=android-app;end">Google</a>
+<a class="btn" href="intent://com.google.android.youtube/#Intent;scheme=android-app;end">YouTube</a>
+<a class="btn" href="intent://com.google.android.apps.maps/#Intent;scheme=android-app;end">Google Maps</a>
+<a class="btn" href="intent://com.android.vending/#Intent;scheme=android-app;end">Google Play Store</a>
+<a class="btn" href="intent://com.android.chrome/#Intent;scheme=android-app;end">Google Chrome</a>
+
+</body>
+</html>

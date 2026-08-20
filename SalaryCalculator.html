@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#121212">
+
+  <title>Salary Calculator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      overscroll-behavior-y: none;
+      background: #121212;
+    }
+
+    body {
+      font-family: "Vazir", sans-serif;
+      background: #121212;
+      color: #f1f1f1;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      direction: rtl;
+      overscroll-behavior-y: none;
+      touch-action: pan-y;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 1.6em;
+    }
+
+    .box {
+      background: #1e1e1e;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+      max-width: 400px;
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+      margin: 8px 0;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #2a2a2a;
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    button.add-btn {
+      background-color: #1976d2;
+      color: white;
+    }
+
+    button.add-btn:hover {
+      background-color: #0d47a1;
+    }
+
+    button.calc-btn {
+      background-color: #f57c00;
+      color: white;
+    }
+
+    button.calc-btn:hover {
+      background-color: #e65100;
+    }
+
+    .entry {
+      position: relative;
+      margin-top: 25px;
+      padding: 15px 10px;
+      background: #242424;
+      border-radius: 10px;
+    }
+
+    .entry:first-child {
+      margin-top: 15px;
+    }
+
+    .time-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 5px 0;
+    }
+
+    .time-label {
+      font-weight: bold;
+      min-width: 55px;
+    }
+
+    .time-value {
+      font-size: 1.05em;
+    }
+
+    .number {
+      margin: 10px auto;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      border-radius: 50%;
+      background: #1976d2;
+      color: white;
+      font-weight: bold;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn {
+      width: auto;
+      font-size: 0.8em;
+      padding: 5px 10px;
+      margin: 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    .edit-btn:hover {
+      background: #0d47a1;
+    }
+
+    .delete-btn {
+      background: #d32f2f;
+      color: #fff;
+    }
+
+    .delete-btn:hover {
+      background: #9a0007;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1em;
+      color: #fff;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #333;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+
+    <h1>محاسبه حقوق ساعتی</h1>
+
+    <p>
+      ساعت را به صورت 4 رقمی<br>
+      و بدون «:» وارد کنید<br>
+      مثال: 1730
+    </p>
+
+    <input
+      type="text"
+      id="timeInput"
+      placeholder="بنویس..."
+      inputmode="numeric"
+      pattern="[0-9]*"
+      maxlength="4"
+      autocomplete="off"
+    >
+
+    <button class="add-btn" onclick="addTime()">ثبت</button>
+    <button class="calc-btn" onclick="calculate()">محاسبه</button>
+
+    <div id="log"></div>
+    <div id="result"></div>
+
+  </div>
+
+  <script>
+    let times = [];
+
+    const logDiv = document.getElementById('log');
+    const resultDiv = document.getElementById('result');
+
+    let expecting = 'ورود';
+
+
+    function parseTime(str) {
+      if (!str || str.length !== 4 || isNaN(str)) {
+        return null;
+      }
+
+      let h = parseInt(str.slice(0, 2));
+      let m = parseInt(str.slice(2));
+
+      if (h > 23 || m > 59) {
+        return null;
+      }
+
+      return {
+        str,
+        h,
+        m
+      };
+    }
+
+
+    function addTime() {
+      const input = document.getElementById('timeInput');
+      const val = input.value.trim();
+
+      const parsed = parseTime(val);
+
+      if (!parsed) {
+        alert('⛔ فرمت ساعت اشتباه است!');
+        return;
+      }
+
+      times.push({
+        ...parsed,
+        type: expecting
+      });
+
+      expecting = (expecting === 'ورود')
+        ? 'خروج'
+        : 'ورود';
+
+      input.value = '';
+      input.focus();
+
+      resultDiv.innerHTML = '';
+
+      renderLog();
+    }
+
+
+    function renderLog() {
+
+      if (times.length === 0) {
+        logDiv.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+
+      for (let i = 0; i < times.length; i += 2) {
+
+        const entryNumber = Math.floor(i / 2) + 1;
+
+        const start = times[i];
+        const end = times[i + 1];
+
+
+        html += `
+          <div class="entry">
+
+            <div class="time-row">
+              <span class="time-label">ورود :</span>
+              <span class="time-value">
+                ${start.str.slice(0, 2)}:${start.str.slice(2)}
+              </span>
+            </div>
+
+            <div class="number">
+              ${entryNumber}
+            </div>
+        `;
+
+
+        if (end) {
+
+          html += `
+            <div class="time-row">
+              <span class="time-label">خروج :</span>
+              <span class="time-value">
+                ${end.str.slice(0, 2)}:${end.str.slice(2)}
+              </span>
+            </div>
+          `;
+
+        } else {
+
+          html += `
+            <div class="time-row">
+              <span class="time-label">خروج :</span>
+              <span class="time-value">---</span>
+            </div>
+          `;
+
+        }
+
+
+        /*
+          دکمه‌ها:
+
+          ✏️ ورود
+          ❌ حذف
+          ✏️ خروج
+        */
+
+        html += `
+            <div class="actions">
+
+              <button
+                class="action-btn edit-btn"
+                onclick="editTime(${i})">
+                ✏️ ورود
+              </button>
+
+              <button
+                class="action-btn delete-btn"
+                onclick="deletePair(${i})">
+                ❌
+              </button>
+        `;
+
+
+        if (end) {
+
+          html += `
+              <button
+                class="action-btn edit-btn"
+                onclick="editTime(${i + 1})">
+                ✏️ خروج
+              </button>
+          `;
+
+        }
+
+
+        html += `
+            </div>
+
+          </div>
+        `;
+      }
+
+
+      logDiv.innerHTML = html;
+    }
+
+
+    function editTime(index) {
+
+      const newVal = prompt(
+        "⏰ زمان جدید را وارد کنید (مثال: 1730):",
+        times[index].str
+      );
+
+      if (newVal === null) {
+        return;
+      }
+
+      const parsed = parseTime(newVal.trim());
+
+      if (!parsed) {
+        alert("⛔ فرمت ساعت اشتباه است!");
+        return;
+      }
+
+      times[index] = {
+        ...parsed,
+        type: times[index].type
+      };
+
+      resultDiv.innerHTML = '';
+
+      renderLog();
+    }
+
+
+    function deletePair(index) {
+
+      if (
+        !confirm(
+          "❓ آیا مطمئن هستید که می‌خواهید این ورود و خروج حذف شود؟"
+        )
+      ) {
+        return;
+      }
+
+      times.splice(index, 2);
+
+      expecting = (times.length % 2 === 0)
+        ? 'ورود'
+        : 'خروج';
+
+      resultDiv.innerHTML = '';
+
+      renderLog();
+    }
+
+
+    function pad(num) {
+      return num.toString().padStart(2, '0');
+    }
+
+
+    function calculate() {
+
+      if (times.length === 0) {
+        alert(
+          '⛔ ابتدا حداقل یک ورود و خروج ثبت کنید!'
+        );
+        return;
+      }
+
+
+      if (times.length % 2 !== 0) {
+        alert(
+          '⛔ تعداد زمان‌ها ناقص است! هر ورود باید یک خروج داشته باشد.'
+        );
+        return;
+      }
+
+
+      let totalMinutes = 0;
+
+
+      for (let i = 0; i < times.length; i += 2) {
+
+        const start = new Date(
+          0,
+          0,
+          0,
+          times[i].h,
+          times[i].m
+        );
+
+        const end = new Date(
+          0,
+          0,
+          0,
+          times[i + 1].h,
+          times[i + 1].m
+        );
+
+
+        if (end <= start) {
+          alert(
+            '⛔ خروج باید بعد از ورود باشد!'
+          );
+          return;
+        }
+
+
+        totalMinutes +=
+          (end - start) / (1000 * 60);
+      }
+
+
+      const hours =
+        Math.floor(totalMinutes / 60);
+
+      const minutes =
+        Math.round(totalMinutes % 60);
+
+
+      const formattedTime =
+        `${pad(hours)}:${pad(minutes)}`;
+
+
+      const wage = prompt(
+        "💵 حقوق ساعتی چقدر است؟ (تومان)"
+      );
+
+
+      let salary = 0;
+
+
+      if (wage && !isNaN(wage)) {
+
+        const hourlyWage =
+          parseFloat(wage);
+
+        salary = Math.floor(
+          (totalMinutes / 60) * hourlyWage
+        );
+      }
+
+
+      resultDiv.innerHTML = `
+        <hr>
+
+        ⏳ مجموع ساعات کاری:
+        <strong>${formattedTime}</strong>
+
+        <br><br>
+
+        💰 حقوق کل:
+        <strong>
+          ${salary.toLocaleString('en-US')}
+        </strong>
+        تومان
+      `;
+    }
+
+
+    /*
+      جلوگیری از Pull-to-Refresh
+    */
+
+    let startY = 0;
+
+
+    document.addEventListener(
+      'touchstart',
+      function(event) {
+
+        if (event.touches.length === 1) {
+          startY =
+            event.touches[0].clientY;
+        }
+
+      },
+      { passive: true }
+    );
+
+
+    document.addEventListener(
+      'touchmove',
+      function(event) {
+
+        const currentY =
+          event.touches[0].clientY;
+
+
+        if (
+          window.scrollY === 0 &&
+          currentY > startY
+        ) {
+          event.preventDefault();
+        }
+
+      },
+      { passive: false }
+    );
+
+
+    document.addEventListener(
+      'touchend',
+      function() {
+        startY = 0;
+      },
+      { passive: true }
+    );
+
+  </script>
+
+</body>
+</html>

@@ -179,7 +179,7 @@
                 <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">نام شما در بازی:</label>
                 <div class="relative">
                     <i class="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                    <input type="text" id="player-name-input" value="Player1" maxlength="16" placeholder="نام خود را وارد کنید..." 
+                    <input type="text" id="player-name-input" value="Player" maxlength="16" placeholder="نام خود را وارد کنید..." 
                         class="w-full bg-gray-900/90 border-2 border-gray-700 focus:border-yellow-500 text-white font-bold py-3 pr-11 pl-4 rounded-xl outline-none transition-all duration-200 text-left dir-ltr">
                 </div>
             </div>
@@ -335,7 +335,7 @@
         const TEAM_T = 'T';
         const TEAM_CT = 'CT';
         let selectedTeam = TEAM_T;
-        let playerName = "Player1";
+        let playerName = "Player";
         let isGameRunning = false;
         let isBuyMenuOpen = false;
         let isPaused = false;
@@ -616,7 +616,7 @@
         function startGame() {
             initAudio();
             const inputVal = document.getElementById('player-name-input').value.trim();
-            playerName = inputVal.length > 0 ? inputVal : "Player1";
+            playerName = inputVal.length > 0 ? inputVal : "Player";
             player.name = playerName;
             player.team = selectedTeam;
 
